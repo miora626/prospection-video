@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide Loom — Gerardo</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; display: flex; height: 100vh; overflow: hidden; color: #1a1a2e; }
+
+/* SIDEBAR */
+.sidebar {
+    width: 260px; min-width: 260px;
+    background: #1A5276;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
+.sidebar-header {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.sidebar-title { font-size: 16px; font-weight: 700; color: white; }
+.sidebar-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+.sidebar-progress {
+    padding: 10px 18px;
+    font-size: 11px; color: rgba(255,255,255,0.5);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.progress-bar { height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; margin-top: 6px; }
+.progress-fill { height: 100%; background: white; border-radius: 2px; transition: width 0.3s; width: 0%; }
+.sidebar-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+.sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+}
+.sidebar-item:hover { background: rgba(255,255,255,0.08); }
+.sidebar-item.active { background: rgba(255,255,255,0.15); border-left-color: white; }
+.sidebar-item.done { opacity: 0.5; }
+.sidebar-num { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); font-family: monospace; min-width: 20px; }
+.sidebar-info { flex: 1; min-width: 0; }
+.sidebar-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-company { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.sidebar-check { font-size: 12px; color: rgba(255,255,255,0.3); font-weight: 700; }
+.sidebar-item.done .sidebar-check { color: #2ECC71; }
+
+/* MAIN */
+.main { flex: 1; overflow-y: auto; padding: 24px; }
+
+.panel { display: none; max-width: 720px; margin: 0 auto; }
+.panel.active { display: block; }
+
+.panel-header {
+    background: #1A5276; color: white;
+    border-radius: 12px 12px 0 0; padding: 18px 24px;
+    display: flex; align-items: center; gap: 16px;
+}
+.panel-counter { font-size: 12px; font-weight: 700; opacity: 0.5; white-space: nowrap; }
+.panel-identity { flex: 1; }
+.panel-name { font-size: 20px; font-weight: 700; }
+.panel-meta { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+.panel-timer { font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 5px 12px; white-space: nowrap; }
+
+.panel-body { background: white; padding: 24px; display: flex; flex-direction: column; gap: 6px; }
+
+.step-block { background: #F8F9FA; border-radius: 10px; padding: 18px 20px; border-left: 4px solid #2980B9; }
+.step-cta { border-left-color: #E74C3C; background: #FFF8F8; }
+
+.step-tag {
+    display: inline-block; font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+    border-radius: 4px; padding: 3px 8px; margin-bottom: 8px;
+}
+.tag-screen { background: #D6E4F0; color: #1A5276; }
+.tag-article { background: #EBF5FB; color: #1A5276; }
+.tag-cta { background: #FDEDEC; color: #C0392B; }
+
+.step-title { font-size: 14px; font-weight: 700; color: #2C3E50; margin-bottom: 12px; }
+
+.url-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #2980B9; color: white;
+    font-size: 13px; font-weight: 600;
+    text-decoration: none; border-radius: 6px;
+    padding: 8px 14px; margin-bottom: 14px;
+    transition: opacity 0.15s;
+}
+.url-btn:hover { opacity: 0.85; }
+
+.instruction-box {
+    background: white; border: 1px solid #E0E0E0;
+    border-radius: 6px; padding: 10px 14px; margin-bottom: 10px;
+}
+.instruction-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 4px; }
+.instruction-text { font-size: 13px; color: #555; line-height: 1.5; }
+
+.script-box { background: white; border: 1px solid #E0E0E0; border-radius: 6px; padding: 12px 14px; }
+.cta-script { border-color: #F5B7B1; background: #FFF8F8; }
+.script-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 6px; }
+.script-text { font-size: 15px; line-height: 1.7; color: #1a1a2e; font-style: italic; }
+
+.arrow-separator { text-align: center; font-size: 12px; color: #BDC3C7; font-weight: 600; letter-spacing: 0.5px; padding: 4px 0; }
+
+.panel-nav {
+    background: #F8F9FA; border-radius: 0 0 12px 12px;
+    border-top: 1px solid #eee;
+    padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
+}
+.nav-btn {
+    padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s;
+}
+.nav-btn { background: #ECF0F1; color: #7F8C8D; }
+.nav-btn:hover { background: #D5D8DC; }
+.nav-btn.primary { background: #1A5276; color: white; }
+.nav-btn.primary:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">🎬 Gerardo</div>
+        <div class="sidebar-sub">Guide Loom — Daylindo</div>
+    </div>
+    <div class="sidebar-progress">
+        <span id="progress-text">0 / 9 terminés</span>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="sidebar-list">
+        
+        <div class="sidebar-item" id="nav-1" onclick="goTo(1)">
+            <span class="sidebar-num">01</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Vincent Chanron</div>
+                <div class="sidebar-company">Daher</div>
+            </div>
+            <span class="sidebar-check" id="check-1">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-2" onclick="goTo(2)">
+            <span class="sidebar-num">02</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Michael Encaoua</div>
+                <div class="sidebar-company">Daher</div>
+            </div>
+            <span class="sidebar-check" id="check-2">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-3" onclick="goTo(3)">
+            <span class="sidebar-num">03</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Camille Raymond</div>
+                <div class="sidebar-company">Daher</div>
+            </div>
+            <span class="sidebar-check" id="check-3">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-4" onclick="goTo(4)">
+            <span class="sidebar-num">04</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Cheikh DAFF</div>
+                <div class="sidebar-company">Vinci Construction</div>
+            </div>
+            <span class="sidebar-check" id="check-4">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-5" onclick="goTo(5)">
+            <span class="sidebar-num">05</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Sarah BEN REHOUMA</div>
+                <div class="sidebar-company">Vinci Construction</div>
+            </div>
+            <span class="sidebar-check" id="check-5">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-6" onclick="goTo(6)">
+            <span class="sidebar-num">06</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Anita Ferreira</div>
+                <div class="sidebar-company">Stellantis</div>
+            </div>
+            <span class="sidebar-check" id="check-6">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-7" onclick="goTo(7)">
+            <span class="sidebar-num">07</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">José Monteiro</div>
+                <div class="sidebar-company">Alstom</div>
+            </div>
+            <span class="sidebar-check" id="check-7">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-8" onclick="goTo(8)">
+            <span class="sidebar-num">08</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Sandrine Monnier</div>
+                <div class="sidebar-company">Scania France</div>
+            </div>
+            <span class="sidebar-check" id="check-8">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-9" onclick="goTo(9)">
+            <span class="sidebar-num">09</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Nicolas Marchand</div>
+                <div class="sidebar-company">Enedis</div>
+            </div>
+            <span class="sidebar-check" id="check-9">✓</span>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    
+        <div class="panel" id="panel-1">
+            <div class="panel-header">
+                <div class="panel-counter">1 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Vincent Chanron</div>
+                    <div class="panel-meta">Chief HR Officer — Comex — Daher</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.daher.com" target="_blank">↗ Ouvrir : daher.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section qui parle de l'excellence opérationnelle et des savoir-faire aéronautiques.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Vincent, j'ai navigué sur le site de Daher et j'ai vu que le groupe positionne l'excellence opérationnelle et les savoir-faire aéronautiques comme son ADN central. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.aerocontact.com/actualite-aeronautique-spatiale/100451-daher-integre-son-drh-vincent-chanron-au-comite-executif" target="_blank">↗ Ouvrir : aerocontact.com — annonce nomination Comex</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet onglet. Fais défiler jusqu'au titre de l'article.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici votre nomination au Comex de Daher en mai — vous intégrez l'instance de pilotage stratégique du groupe. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« En tant que Chief HR Officer au Comex, votre priorité c'est aligner les pratiques RH sur la stratégie groupe. La question concrète : vos formateurs terrain transmettent les gestes aéronautiques — est-ce que cette transmission est aujourd'hui structurée, pilotée, et prouvable ? C'est exactement ce que Daylindo permet. Je serais ravi de vous montrer en 15 minutes. »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <div></div>
+                <button class="nav-btn primary" onclick="markDone(1); goTo(2)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-2">
+            <div class="panel-header">
+                <div class="panel-counter">2 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Michael Encaoua</div>
+                    <div class="panel-meta">DRH & HSE Division Industrie — Daher</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.daher.com" target="_blank">↗ Ouvrir : daher.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section savoir-faire / industrie aéronautique.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Michael, sur le site de Daher, on voit que la maîtrise des gestes techniques aéronautiques est présentée comme un différenciateur clé du groupe. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.aerocontact.com/actualite-aeronautique-spatiale/100405-proman-recrute-800-talents-pour-soutenir-la-montee-en-cadence-de-daher" target="_blank">↗ Ouvrir : aerocontact.com — Proman recrute 800 pour Daher</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet onglet. Montre le titre et le premier paragraphe.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici que Proman recrute en ce moment 800 collaborateurs pour Daher — une montée en cadence massive, notamment sur Marignane. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Vous portez à la fois la RH et la HSE de la Division Industrie. 800 intérimaires intégrés sans parcours structuré, c'est un risque HSE direct. Comment garantissez-vous que le geste aéronautique est maîtrisé avant mise en poste — et que c'est traçable ? C'est le sujet sur lequel Daylindo peut vous aider. Est-ce qu'on peut en parler 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(1)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(2); goTo(3)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-3">
+            <div class="panel-header">
+                <div class="panel-counter">3 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Camille Raymond</div>
+                    <div class="panel-meta">Responsable Emploi Compétences & Formation — Daher</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.daher.com" target="_blank">↗ Ouvrir : daher.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section compétences opérationnelles / recrutement.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Camille, sur le site de Daher, le groupe valorise la précision des compétences opérationnelles terrain comme un standard non négociable. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.aerocontact.com/actualite-aeronautique-spatiale/100405-proman-recrute-800-talents-pour-soutenir-la-montee-en-cadence-de-daher" target="_blank">↗ Ouvrir : aerocontact.com — 800 recrutements Daher via Proman</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet onglet. Montre le titre et le passage sur les profils sans prérequis.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici la campagne Proman pour Daher — 800 recrutements, des profils sans prérequis aéronautiques, formés en interne. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« En tant que Responsable Emploi et Formation, c'est vous qui devez garantir que ces nouveaux arrivent au niveau. Quel dispositif vous permet de prouver que la compétence est réellement transmise et tracée sur chaque nouveau ? C'est exactement ce que Daylindo apporte. Est-ce qu'on peut en discuter 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(2)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(3); goTo(4)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-4">
+            <div class="panel-header">
+                <div class="panel-counter">4 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Cheikh DAFF</div>
+                    <div class="panel-meta">DRH France — Vinci Construction</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.vinci-construction.com" target="_blank">↗ Ouvrir : vinci-construction.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section grands projets / compétences terrain.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Cheikh, en visitant le site de Vinci Construction, on voit que le groupe affiche l'ambition de structurer les compétences terrain sur ses grands projets d'infrastructure. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://rh.newstank.fr/article/view/423205/vinci-construction-cheikh-daff-drh-compter-01-02-2026.html" target="_blank">↗ Ouvrir : newstank.fr — nomination DRH France fév. 2026</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet onglet. Montre le titre de l'article avec la date.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici votre nomination comme DRH France de Vinci Construction en février — avec la responsabilité directe du Canal Seine-Nord. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Prendre en main un méga-projet multi-lots avec des équipes sur des dizaines de sites en co-activité, c'est un défi RH immédiat. Comment structurez-vous la transmission des compétences terrain dans ce contexte ? C'est exactement ce que Daylindo permet. Est-ce qu'on peut en parler 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(3)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(4); goTo(5)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-5">
+            <div class="panel-header">
+                <div class="panel-counter">5 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Sarah BEN REHOUMA</div>
+                    <div class="panel-meta">DRH Division Génie Civil France — Vinci Construction</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.vinci-construction.com" target="_blank">↗ Ouvrir : vinci-construction.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section gestion des compétences sur projets complexes.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Sarah, sur le site de Vinci Construction, le groupe met en avant sa capacité à gérer les compétences terrain sur des projets complexes à grande échelle. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.constructionbtp.com/terrassements-carrieres/article/2026/04/22/155345/1er-lot-des-terrassements-masse-canal-seinenord-europe-remporte-par-spie-batignolles" target="_blank">↗ Ouvrir : constructionbtp.com — Canal Seine-Nord co-activité</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet onglet. Montre le passage sur la co-activité des groupes BTP.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici que le Canal Seine-Nord mobilise de nombreux groupes BTP en co-activité simultanée — dont Vinci Construction sur plusieurs lots. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« En tant que DRH de la Division Génie Civil, comment garantissez-vous que les gestes critiques BTP sont homogènes et traçables d'un site à l'autre, avec des dizaines de sous-traitants en co-activité ? C'est exactement ce que Daylindo permet de structurer. Est-ce qu'on peut en parler 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(4)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(5); goTo(6)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-6">
+            <div class="panel-header">
+                <div class="panel-counter">6 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Anita Ferreira</div>
+                    <div class="panel-meta">Directrice Compétences & Formation France — Stellantis</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.stellantis.com" target="_blank">↗ Ouvrir : stellantis.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section transformation industrielle / compétences.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Anita, sur le site de Stellantis, le groupe positionne la montée en compétences comme un enjeu stratégique central de sa transformation industrielle. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.media.stellantis.com/fr-fr/corporate/press/stellantis-va-investir-plus-d-un-milliard-d-euros-en-france-pour-produire-a-mulhouse-trois-nouveaux-modeles-peugeot" target="_blank">↗ Ouvrir : media.stellantis.com — 1 Md€ Mulhouse 2029</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet onglet. Montre le titre du communiqué et le montant d'investissement.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici l'annonce officielle : Stellantis investit plus d'un milliard d'euros à Mulhouse pour produire trois nouveaux modèles électriques à partir de 2029. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« En tant que Directrice Compétences et Formation France, vous devez anticiper dès maintenant les nouvelles compétences terrain pour une usine qui va changer de fond en comble. Comment structurez-vous cette transmission avant même que les lignes soient en place ? C'est le sujet sur lequel Daylindo peut vous aider concrètement. »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(5)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(6); goTo(7)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-7">
+            <div class="panel-header">
+                <div class="panel-counter">7 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">José Monteiro</div>
+                    <div class="panel-meta">HR Director Valenciennes — Alstom</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.alstom.com" target="_blank">↗ Ouvrir : alstom.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section savoir-faire ferroviaires / compétences techniques.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour José, sur le site d'Alstom, on voit que la maîtrise des gestes ferroviaires de précision est positionnée comme une compétence critique et différenciante. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.batiactu.com" target="_blank">↗ Ouvrir : batiactu.com — recrutements Alstom Petite-Forêt</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet onglet. Montre l'article ou la recherche sur Alstom Valenciennes recrutements.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici que Alstom recrute sur le site de Petite-Forêt pour le TGV et le métro lyonnais, dans un contexte de départs de seniors. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Avec des seniors qui partent et des gestes ferroviaires de précision à transmettre aux nouveaux, comment capturez-vous ce savoir avant qu'il disparaisse ? C'est exactement ce que Daylindo permet de faire. Est-ce qu'on peut en parler 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(6)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(7); goTo(8)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-8">
+            <div class="panel-header">
+                <div class="panel-counter">8 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Sandrine Monnier</div>
+                    <div class="panel-meta">DRH — Scania France</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://journaldupoidslourd.com/constructeurs/scania-france-cree-un-parcours-de-reconversion-en-mecanicien-poids-lourd/" target="_blank">↗ Ouvrir : journaldupoidslourd.com — parcours reconversion Scania</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cet article. Montre le titre et le passage où Sandrine Monnier est citée.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Sandrine, j'ai lu cet article sur le parcours de reconversion mécanicien que Scania France a lancé en mars — recruter en CDI des profils sans diplôme et les former en interne, c'est une initiative vraiment forte. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.scania.com/fr" target="_blank">↗ Ouvrir : scania.com/fr</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur le site Scania. Montre la section transmission des savoir-faire / formation.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et sur le site de Scania, on voit que la transmission des savoir-faire techniques est au cœur de la promesse employeur du groupe. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Pour que ce pari de reconversion soit crédible, la transmission des gestes mécaniques doit être structurée, pilotée et prouvable. C'est exactement ce que Daylindo permet. Est-ce qu'on peut en discuter 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(7)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(8); goTo(9)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-9">
+            <div class="panel-header">
+                <div class="panel-counter">9 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Nicolas Marchand</div>
+                    <div class="panel-meta">DRH Direction Transformation — Enedis</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.enedis.fr/magazine/enedis-acteur-majeur-du-recrutement-en-france" target="_blank">↗ Ouvrir : enedis.fr — interview Nicolas Marchand</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre le titre et le passage où Nicolas Marchand parle de la transmission des savoir-faire.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Nicolas, j'ai lu votre interview sur le site Enedis — 3 100 recrutements prévus en 2026, avec un accent fort sur l'alternance et la transmission des savoir-faire. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.lejournaldesentreprises.com/breve/enedis-recrute-100-personnes-en-normandie-en-2026-dont-plus-dun-tiers-en-alternance-2140515" target="_blank">↗ Ouvrir : lejournaldesentreprises.com — 100 recrutements Normandie</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet article. Montre le titre et le chiffre 42 alternants.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici que vous recrutez 100 personnes en Normandie cette année, dont 42 alternants — sur des métiers de techniciens réseau électrique. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Sur des gestes réseau électrique, l'enjeu n'est pas seulement RH — c'est HSE. Un alternant mis en autonomie sans traçabilité de sa compétence, c'est un risque réel. Est-ce que le dispositif actuel vous permet de prouver que le geste est maîtrisé avant intervention sur réseau ? C'est le sujet sur lequel Daylindo peut vous aider. 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(8)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(9)">Marquer terminé ✓</button>
+            </div>
+        </div>
+</div>
+
+<script>
+const total = 9;
+let done = new Set();
+
+function goTo(n) {
+    if (n < 1 || n > total) return;
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    document.getElementById('panel-' + n).classList.add('active');
+    document.getElementById('nav-' + n).classList.add('active');
+    document.getElementById('nav-' + n).scrollIntoView({block:'nearest'});
+    window.scrollTo(0,0);
+}
+
+function markDone(n) {
+    done.add(n);
+    document.getElementById('nav-' + n).classList.add('done');
+    updateProgress();
+}
+
+function updateProgress() {
+    const pct = Math.round((done.size / total) * 100);
+    document.getElementById('progress-text').textContent = done.size + ' / ' + total + ' terminés';
+    document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+goTo(1);
+</script>
+</body>
+</html>
