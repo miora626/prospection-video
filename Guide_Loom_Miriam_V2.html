@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide Loom — Miriam</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; display: flex; height: 100vh; overflow: hidden; color: #1a1a2e; }
+
+/* SIDEBAR */
+.sidebar {
+    width: 260px; min-width: 260px;
+    background: #1E8449;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
+.sidebar-header {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.sidebar-title { font-size: 16px; font-weight: 700; color: white; }
+.sidebar-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+.sidebar-progress {
+    padding: 10px 18px;
+    font-size: 11px; color: rgba(255,255,255,0.5);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.progress-bar { height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; margin-top: 6px; }
+.progress-fill { height: 100%; background: white; border-radius: 2px; transition: width 0.3s; width: 0%; }
+.sidebar-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+.sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+}
+.sidebar-item:hover { background: rgba(255,255,255,0.08); }
+.sidebar-item.active { background: rgba(255,255,255,0.15); border-left-color: white; }
+.sidebar-item.done { opacity: 0.5; }
+.sidebar-num { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); font-family: monospace; min-width: 20px; }
+.sidebar-info { flex: 1; min-width: 0; }
+.sidebar-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-company { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.sidebar-check { font-size: 12px; color: rgba(255,255,255,0.3); font-weight: 700; }
+.sidebar-item.done .sidebar-check { color: #2ECC71; }
+
+/* MAIN */
+.main { flex: 1; overflow-y: auto; padding: 24px; }
+
+.panel { display: none; max-width: 720px; margin: 0 auto; }
+.panel.active { display: block; }
+
+.panel-header {
+    background: #1E8449; color: white;
+    border-radius: 12px 12px 0 0; padding: 18px 24px;
+    display: flex; align-items: center; gap: 16px;
+}
+.panel-counter { font-size: 12px; font-weight: 700; opacity: 0.5; white-space: nowrap; }
+.panel-identity { flex: 1; }
+.panel-name { font-size: 20px; font-weight: 700; }
+.panel-meta { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+.panel-timer { font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 5px 12px; white-space: nowrap; }
+
+.panel-body { background: white; padding: 24px; display: flex; flex-direction: column; gap: 6px; }
+
+.step-block { background: #F8F9FA; border-radius: 10px; padding: 18px 20px; border-left: 4px solid #27AE60; }
+.step-cta { border-left-color: #E74C3C; background: #FFF8F8; }
+
+.step-tag {
+    display: inline-block; font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+    border-radius: 4px; padding: 3px 8px; margin-bottom: 8px;
+}
+.tag-screen { background: #D5F5E3; color: #1E8449; }
+.tag-article { background: #EBF5FB; color: #1A5276; }
+.tag-cta { background: #FDEDEC; color: #C0392B; }
+
+.step-title { font-size: 14px; font-weight: 700; color: #2C3E50; margin-bottom: 12px; }
+
+.url-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #27AE60; color: white;
+    font-size: 13px; font-weight: 600;
+    text-decoration: none; border-radius: 6px;
+    padding: 8px 14px; margin-bottom: 14px;
+    transition: opacity 0.15s;
+}
+.url-btn:hover { opacity: 0.85; }
+
+.instruction-box {
+    background: white; border: 1px solid #E0E0E0;
+    border-radius: 6px; padding: 10px 14px; margin-bottom: 10px;
+}
+.instruction-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 4px; }
+.instruction-text { font-size: 13px; color: #555; line-height: 1.5; }
+
+.script-box { background: white; border: 1px solid #E0E0E0; border-radius: 6px; padding: 12px 14px; }
+.cta-script { border-color: #F5B7B1; background: #FFF8F8; }
+.script-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 6px; }
+.script-text { font-size: 15px; line-height: 1.7; color: #1a1a2e; font-style: italic; }
+
+.arrow-separator { text-align: center; font-size: 12px; color: #BDC3C7; font-weight: 600; letter-spacing: 0.5px; padding: 4px 0; }
+
+.panel-nav {
+    background: #F8F9FA; border-radius: 0 0 12px 12px;
+    border-top: 1px solid #eee;
+    padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
+}
+.nav-btn {
+    padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s;
+}
+.nav-btn { background: #ECF0F1; color: #7F8C8D; }
+.nav-btn:hover { background: #D5D8DC; }
+.nav-btn.primary { background: #1E8449; color: white; }
+.nav-btn.primary:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">🎬 Miriam</div>
+        <div class="sidebar-sub">Guide Loom — Daylindo</div>
+    </div>
+    <div class="sidebar-progress">
+        <span id="progress-text">0 / 9 terminés</span>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="sidebar-list">
+        
+        <div class="sidebar-item" id="nav-1" onclick="goTo(1)">
+            <span class="sidebar-num">01</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Guillaume Desoblin</div>
+                <div class="sidebar-company">Emeis</div>
+            </div>
+            <span class="sidebar-check" id="check-1">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-2" onclick="goTo(2)">
+            <span class="sidebar-num">02</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Sophie THOMERET</div>
+                <div class="sidebar-company">Emeis</div>
+            </div>
+            <span class="sidebar-check" id="check-2">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-3" onclick="goTo(3)">
+            <span class="sidebar-num">03</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Christophe GUILLERY</div>
+                <div class="sidebar-company">Emeis</div>
+            </div>
+            <span class="sidebar-check" id="check-3">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-4" onclick="goTo(4)">
+            <span class="sidebar-num">04</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Nadège PLOU</div>
+                <div class="sidebar-company">Clariane</div>
+            </div>
+            <span class="sidebar-check" id="check-4">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-5" onclick="goTo(5)">
+            <span class="sidebar-num">05</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Camille BLANCHET</div>
+                <div class="sidebar-company">Clariane</div>
+            </div>
+            <span class="sidebar-check" id="check-5">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-6" onclick="goTo(6)">
+            <span class="sidebar-num">06</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Joëlle Hélénon</div>
+                <div class="sidebar-company">Clariane</div>
+            </div>
+            <span class="sidebar-check" id="check-6">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-7" onclick="goTo(7)">
+            <span class="sidebar-num">07</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Isabelle DEBRY</div>
+                <div class="sidebar-company">JJA Logistique</div>
+            </div>
+            <span class="sidebar-check" id="check-7">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-8" onclick="goTo(8)">
+            <span class="sidebar-num">08</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Jean-Yves Chameyrat</div>
+                <div class="sidebar-company">STEF</div>
+            </div>
+            <span class="sidebar-check" id="check-8">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-9" onclick="goTo(9)">
+            <span class="sidebar-num">09</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Leslie Crepeau</div>
+                <div class="sidebar-company">STEF</div>
+            </div>
+            <span class="sidebar-check" id="check-9">✓</span>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    
+        <div class="panel" id="panel-1">
+            <div class="panel-header">
+                <div class="panel-counter">1 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Guillaume Desoblin</div>
+                    <div class="panel-meta">DRH France — Emeis</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.emeis.fr/fr" target="_blank">↗ Ouvrir : emeis.fr</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section qualité des soins / bientraitance.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Guillaume, sur le site d'Emeis, le groupe positionne la qualité des soins et la bientraitance comme priorité absolue — au cœur de la mission post-restructuration. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.lemediasocial.fr/olivier-dussopt-va-remplacer-guillaume-pepy-a-la-tete-d-emeis_9k3G8d" target="_blank">↗ Ouvrir : lemediasocial.fr — Emeis sort du plan de sauvegarde</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet article. Montre le titre et la date (avril 2026).</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici qu'Emeis vient de sortir de son plan de sauvegarde en avril — un redressement majeur, dans un secteur où France Travail prévoit 70 000 recrutements d'auxiliaires de vie cette année. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« En tant que DRH France, vous devez recruter massivement dans un secteur en pénurie chronique tout en maintenant la qualité des soins. Comment transmettez-vous les gestes soins critiques sans mobiliser des formateurs qui n'ont pas le temps ? C'est un enjeu HSE autant que RH — et c'est exactement ce que Daylindo permet. Est-ce qu'on peut en parler 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <div></div>
+                <button class="nav-btn primary" onclick="markDone(1); goTo(2)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-2">
+            <div class="panel-header">
+                <div class="panel-counter">2 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Sophie THOMERET</div>
+                    <div class="panel-meta">Directrice Talents & Learning Groupe — Emeis</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.emeis.fr/fr" target="_blank">↗ Ouvrir : emeis.fr</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section développement des compétences / formation.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Sophie, sur le site d'Emeis, le groupe s'engage sur le développement des compétences de ses 83 500 collaborateurs comme levier de qualité des soins. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://prendresoin.francetravail.fr/actualites/recrutements-2026" target="_blank">↗ Ouvrir : francetravail.fr — 70 000 recrutements auxiliaires 2026</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cette page. Montre les chiffres : 70 000 recrutements auxiliaires, 500 000 postes santé d'ici 2030.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici les chiffres France Travail : 70 000 recrutements d'auxiliaires de vie cette année, 500 000 postes dans la santé à pourvoir d'ici 2030. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« À cette échelle, le L&D ne peut plus reposer sur des formateurs terrain individuels. Quels outils permettent de tracer que le geste soins critiques est maîtrisé, de façon homogène, dans tous les établissements Emeis ? C'est exactement le sujet de Daylindo. Je serais ravie d'en discuter 15 minutes. »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(1)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(2); goTo(3)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-3">
+            <div class="panel-header">
+                <div class="panel-counter">3 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Christophe GUILLERY</div>
+                    <div class="panel-meta">Directeur Formation & Alternance France — Emeis</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.emeis.fr/fr" target="_blank">↗ Ouvrir : emeis.fr</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section alternance / formation professionnelle.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Christophe, sur le site d'Emeis, l'alternance et la formation professionnelle sont identifiées comme des leviers centraux d'intégration et de montée en compétences. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://prendresoin.francetravail.fr/actualites/recrutements-2026" target="_blank">↗ Ouvrir : francetravail.fr — tensions médico-social, tuteurs sous pression</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cette page. Montre les chiffres de tension sur les métiers du soin.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici que les métiers du soin sont parmi les plus en tension en 2026 — avec un volume d'alternants en croissance et des tuteurs terrain en sous-effectif chronique. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Vous portez le paradoxe le plus dur du secteur : former plus avec des tuteurs qui ont structurellement moins de temps. Quand le tuteur est débordé, la transmission devient informelle et non traçable — c'est un risque HSE réel. Daylindo permet de structurer ça sans surcharger le terrain. Est-ce qu'on peut en parler 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(2)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(3); goTo(4)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-4">
+            <div class="panel-header">
+                <div class="panel-counter">4 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Nadège PLOU</div>
+                    <div class="panel-meta">Group CHRO — Clariane</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.clariane.com/carrieres" target="_blank">↗ Ouvrir : clariane.com/carrieres</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section Top Employer / qualité des pratiques RH.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Nadège, sur le site de Clariane, le groupe positionne la qualité de ses pratiques RH et sa certification Top Employer 2025 comme différenciateurs employeur dans un marché en tension. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://prendresoin.francetravail.fr/actualites/recrutements-2026" target="_blank">↗ Ouvrir : francetravail.fr — 500 000 postes santé d'ici 2030</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cette page. Montre le chiffre 500 000 postes d'ici 2030.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici que France Travail prévoit 500 000 postes à pourvoir dans la santé d'ici 2030 — les métiers du soin restent les plus en tension en 2026. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Dans un marché où attirer les soignants est de plus en plus difficile, la capacité à les former vite et bien devient un avantage compétitif réel. Comment Clariane garantit-il aujourd'hui l'homogénéité de la transmission des gestes soins dans ses 666 EHPAD ? C'est le sujet sur lequel Daylindo peut apporter une réponse concrète. »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(3)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(4); goTo(5)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-5">
+            <div class="panel-header">
+                <div class="panel-counter">5 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Camille BLANCHET</div>
+                    <div class="panel-meta">DRH France — Clariane</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.clariane.com" target="_blank">↗ Ouvrir : clariane.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section engagement qualité des soins / bientraitance.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Camille, sur le site de Clariane, le groupe s'engage publiquement sur la qualité des soins et la bientraitance dans l'ensemble de ses établissements en France. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.lemediasocial.fr/sante-et-action-sociale-des-tensions-de-recrutement-persistantes-selon-france-travail_OTN6Dn" target="_blank">↗ Ouvrir : lemediasocial.fr — tensions recrutement médico-social 2026</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet article. Montre le titre et la date.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici que les tensions de recrutement dans le médico-social restent persistantes en 2026 selon France Travail. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Quand les équipes sont en tension, la tentation est de raccourcir les parcours d'intégration. Mais sur des gestes soins, c'est un risque qu'on ne peut pas prendre. Comment tracez-vous que le geste est réellement acquis avant mise en autonomie, sur l'ensemble du réseau Clariane ? C'est exactement ce que Daylindo permet. 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(4)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(5); goTo(6)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-6">
+            <div class="panel-header">
+                <div class="panel-counter">6 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Joëlle Hélénon</div>
+                    <div class="panel-meta">Directrice Université Clariane — Clariane</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.hellowork.com/fr-fr/entreprises/clariane-130101.html" target="_blank">↗ Ouvrir : hellowork.com — Université Clariane</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre le passage sur l'Université Clariane comme réponse à la pénurie.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Joëlle, j'ai vu sur Hellowork que l'Université Clariane est citée comme la réponse concrète du groupe à la pénurie de professionnels de santé qualifiés. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://fr.wikipedia.org/wiki/Clariane" target="_blank">↗ Ouvrir : Wikipedia — Clariane, Université créée 2023</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cette page. Montre le passage : Université créée en 2023, 185 premiers diplômés.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici que l'Université Clariane a été créée en 2023 — avec déjà 185 premiers diplômés à la première promo. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Votre mission est exactement de structurer comment les savoirs soignants se transmettent à grande échelle. Daylindo est l'outil opérationnel qui donne à vos formateurs internes la capacité de tracer, piloter et prouver cette transmission geste par geste. Je serais ravie de vous montrer comment en 15 minutes. »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(5)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(6); goTo(7)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-7">
+            <div class="panel-header">
+                <div class="panel-counter">7 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Isabelle DEBRY</div>
+                    <div class="panel-meta">DRH Logistique — JJA Logistique</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.jja.fr" target="_blank">↗ Ouvrir : jja.fr</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la page d'accueil — logistique multi-références.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Isabelle, en visitant le site de JJA, on voit que le groupe opère une logistique multi-références à grande échelle — un métier où les compétences terrain sont déterminantes. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.helloworkplace.fr" target="_blank">↗ Ouvrir : helloworkplace.fr — nomination DRH JJA</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet onglet. Montre l'article de nomination.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici l'annonce de votre nomination comme DRH de JJA Logistique — félicitations pour cette prise de poste. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Dans les 90 jours qui suivent une nomination, les DRH qui créent le plus d'impact sont souvent ceux qui posent rapidement un cadre sur la transmission des compétences terrain. Est-ce un sujet déjà identifié dans votre prise de poste ? C'est exactement ce sur quoi Daylindo peut vous aider à avancer vite. 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(6)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(7); goTo(8)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-8">
+            <div class="panel-header">
+                <div class="panel-counter">8 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Jean-Yves Chameyrat</div>
+                    <div class="panel-meta">DRH Groupe — STEF</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.stef.com/corporate/fr/newsroom/communique-de-presse/stef-prevoit-3-400-recrutements-en-france-en-2026" target="_blank">↗ Ouvrir : stef.com — communiqué 3 400 recrutements</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre ce communiqué. Montre le titre et le passage où tu es cité.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Jean-Yves, j'ai lu votre communiqué de presse sur le site de STEF — 3 400 recrutements en 2026, dont 2 800 CDI sans prérequis de formation initiale. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.stef.com" target="_blank">↗ Ouvrir : stef.com — formation interne chaîne du froid</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur le site STEF. Montre la section formation / montée en compétences.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et sur le site de STEF, on voit que le groupe assure lui-même la formation aux spécificités des métiers de la chaîne du froid pour tous ces nouveaux. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« 2 800 CDI sans prérequis à former en interne — qui forme, comment, et comment prouvez-vous que le geste est acquis avant autonomie sur les lignes ? C'est exactement le sujet sur lequel Daylindo peut vous apporter une réponse opérationnelle. Est-ce qu'on peut en discuter 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(7)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(8); goTo(9)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-9">
+            <div class="panel-header">
+                <div class="panel-counter">9 / 9</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Leslie Crepeau</div>
+                    <div class="panel-meta">Responsable Formation France — STEF</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.faq-logistique.com/CP20260211-STEF-3400-Recrutements-France.htm" target="_blank">↗ Ouvrir : faq-logistique.com — STEF 2800 CDI sans prérequis</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cet article. Montre le passage sur les CDI sans prérequis et la formation interne.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Leslie, j'ai lu cet article sur le plan de recrutement STEF — 2 800 CDI sans prérequis, avec une formation aux métiers du froid assurée en interne. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.stef.com" target="_blank">↗ Ouvrir : stef.com — formation terrain opérateurs</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur le site STEF. Montre la section formation / mobilité interne.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et sur le site de STEF, on voit que c'est le groupe lui-même qui garantit la montée en compétences des opérateurs sur le terrain. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« En tant que Responsable Formation France, vous êtes en première ligne. Avec ce volume, comment vous assurez-vous que chaque formateur terrain transmet le même geste, de la même façon, avec une preuve opposable à la fin ? C'est le défi que Daylindo permet de résoudre. Je serais ravie d'en parler 15 minutes. »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(8)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(9)">Marquer terminé ✓</button>
+            </div>
+        </div>
+</div>
+
+<script>
+const total = 9;
+let done = new Set();
+
+function goTo(n) {
+    if (n < 1 || n > total) return;
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    document.getElementById('panel-' + n).classList.add('active');
+    document.getElementById('nav-' + n).classList.add('active');
+    document.getElementById('nav-' + n).scrollIntoView({block:'nearest'});
+    window.scrollTo(0,0);
+}
+
+function markDone(n) {
+    done.add(n);
+    document.getElementById('nav-' + n).classList.add('done');
+    updateProgress();
+}
+
+function updateProgress() {
+    const pct = Math.round((done.size / total) * 100);
+    document.getElementById('progress-text').textContent = done.size + ' / ' + total + ' terminés';
+    document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+goTo(1);
+</script>
+</body>
+</html>
