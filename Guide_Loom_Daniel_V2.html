@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide Loom — Daniel</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; display: flex; height: 100vh; overflow: hidden; color: #1a1a2e; }
+
+/* SIDEBAR */
+.sidebar {
+    width: 260px; min-width: 260px;
+    background: #7D6608;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
+.sidebar-header {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.sidebar-title { font-size: 16px; font-weight: 700; color: white; }
+.sidebar-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+.sidebar-progress {
+    padding: 10px 18px;
+    font-size: 11px; color: rgba(255,255,255,0.5);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.progress-bar { height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; margin-top: 6px; }
+.progress-fill { height: 100%; background: white; border-radius: 2px; transition: width 0.3s; width: 0%; }
+.sidebar-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+.sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+}
+.sidebar-item:hover { background: rgba(255,255,255,0.08); }
+.sidebar-item.active { background: rgba(255,255,255,0.15); border-left-color: white; }
+.sidebar-item.done { opacity: 0.5; }
+.sidebar-num { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); font-family: monospace; min-width: 20px; }
+.sidebar-info { flex: 1; min-width: 0; }
+.sidebar-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-company { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.sidebar-check { font-size: 12px; color: rgba(255,255,255,0.3); font-weight: 700; }
+.sidebar-item.done .sidebar-check { color: #2ECC71; }
+
+/* MAIN */
+.main { flex: 1; overflow-y: auto; padding: 24px; }
+
+.panel { display: none; max-width: 720px; margin: 0 auto; }
+.panel.active { display: block; }
+
+.panel-header {
+    background: #7D6608; color: white;
+    border-radius: 12px 12px 0 0; padding: 18px 24px;
+    display: flex; align-items: center; gap: 16px;
+}
+.panel-counter { font-size: 12px; font-weight: 700; opacity: 0.5; white-space: nowrap; }
+.panel-identity { flex: 1; }
+.panel-name { font-size: 20px; font-weight: 700; }
+.panel-meta { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+.panel-timer { font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 5px 12px; white-space: nowrap; }
+
+.panel-body { background: white; padding: 24px; display: flex; flex-direction: column; gap: 6px; }
+
+.step-block { background: #F8F9FA; border-radius: 10px; padding: 18px 20px; border-left: 4px solid #D4AC0D; }
+.step-cta { border-left-color: #E74C3C; background: #FFF8F8; }
+
+.step-tag {
+    display: inline-block; font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+    border-radius: 4px; padding: 3px 8px; margin-bottom: 8px;
+}
+.tag-screen { background: #FEF9E7; color: #7D6608; }
+.tag-article { background: #EBF5FB; color: #1A5276; }
+.tag-cta { background: #FDEDEC; color: #C0392B; }
+
+.step-title { font-size: 14px; font-weight: 700; color: #2C3E50; margin-bottom: 12px; }
+
+.url-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #D4AC0D; color: white;
+    font-size: 13px; font-weight: 600;
+    text-decoration: none; border-radius: 6px;
+    padding: 8px 14px; margin-bottom: 14px;
+    transition: opacity 0.15s;
+}
+.url-btn:hover { opacity: 0.85; }
+
+.instruction-box {
+    background: white; border: 1px solid #E0E0E0;
+    border-radius: 6px; padding: 10px 14px; margin-bottom: 10px;
+}
+.instruction-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 4px; }
+.instruction-text { font-size: 13px; color: #555; line-height: 1.5; }
+
+.script-box { background: white; border: 1px solid #E0E0E0; border-radius: 6px; padding: 12px 14px; }
+.cta-script { border-color: #F5B7B1; background: #FFF8F8; }
+.script-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 6px; }
+.script-text { font-size: 15px; line-height: 1.7; color: #1a1a2e; font-style: italic; }
+
+.arrow-separator { text-align: center; font-size: 12px; color: #BDC3C7; font-weight: 600; letter-spacing: 0.5px; padding: 4px 0; }
+
+.panel-nav {
+    background: #F8F9FA; border-radius: 0 0 12px 12px;
+    border-top: 1px solid #eee;
+    padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
+}
+.nav-btn {
+    padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s;
+}
+.nav-btn { background: #ECF0F1; color: #7F8C8D; }
+.nav-btn:hover { background: #D5D8DC; }
+.nav-btn.primary { background: #7D6608; color: white; }
+.nav-btn.primary:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">🎬 Daniel</div>
+        <div class="sidebar-sub">Guide Loom — Daylindo</div>
+    </div>
+    <div class="sidebar-progress">
+        <span id="progress-text">0 / 8 terminés</span>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="sidebar-list">
+        
+        <div class="sidebar-item" id="nav-1" onclick="goTo(1)">
+            <span class="sidebar-num">01</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Céline VIDILI</div>
+                <div class="sidebar-company">STEF</div>
+            </div>
+            <span class="sidebar-check" id="check-1">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-2" onclick="goTo(2)">
+            <span class="sidebar-num">02</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Audrey Aucouturier</div>
+                <div class="sidebar-company">Grand Frais / Prosol</div>
+            </div>
+            <span class="sidebar-check" id="check-2">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-3" onclick="goTo(3)">
+            <span class="sidebar-num">03</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Nadine M.</div>
+                <div class="sidebar-company">Grand Frais / Prosol</div>
+            </div>
+            <span class="sidebar-check" id="check-3">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-4" onclick="goTo(4)">
+            <span class="sidebar-num">04</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Lionel Bernard</div>
+                <div class="sidebar-company">Spie Batignolles</div>
+            </div>
+            <span class="sidebar-check" id="check-4">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-5" onclick="goTo(5)">
+            <span class="sidebar-num">05</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Floriane Dupont-Rouger</div>
+                <div class="sidebar-company">Spie Batignolles Énergie</div>
+            </div>
+            <span class="sidebar-check" id="check-5">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-6" onclick="goTo(6)">
+            <span class="sidebar-num">06</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Thibaut LILAS</div>
+                <div class="sidebar-company">Cartier / Richemont</div>
+            </div>
+            <span class="sidebar-check" id="check-6">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-7" onclick="goTo(7)">
+            <span class="sidebar-num">07</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Marie-Caroline Abramatic</div>
+                <div class="sidebar-company">Cartier / Richemont</div>
+            </div>
+            <span class="sidebar-check" id="check-7">✓</span>
+        </div>
+        <div class="sidebar-item" id="nav-8" onclick="goTo(8)">
+            <span class="sidebar-num">08</span>
+            <div class="sidebar-info">
+                <div class="sidebar-name">Magalie Hatchiguian</div>
+                <div class="sidebar-company">Balenciaga / Kering</div>
+            </div>
+            <span class="sidebar-check" id="check-8">✓</span>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    
+        <div class="panel" id="panel-1">
+            <div class="panel-header">
+                <div class="panel-counter">1 / 8</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Céline VIDILI</div>
+                    <div class="panel-meta">DRH STEF Transport — STEF</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.stef.com/corporate/fr/newsroom/communique-de-presse/stef-prevoit-3-400-recrutements-en-france-en-2026" target="_blank">↗ Ouvrir : stef.com — communiqué recrutements transport</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre ce communiqué. Montre le passage sur les conducteurs et opérateurs transport.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Céline, j'ai lu le communiqué STEF — 2 800 CDI en 2026, avec les conducteurs et opérateurs transport en priorité absolue. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.stef.com" target="_blank">↗ Ouvrir : stef.com — formation et mobilité interne</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur le site STEF. Montre la section parcours / formation interne.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et sur le site de STEF, on voit que le groupe mise sur la formation interne et la mobilité comme leviers de fidélisation. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Chaque nouveau qui monte en autonomie sans parcours structuré représente un coût caché réel — en temps de supervision, en erreurs, en turnover. Est-ce que vous avez déjà chiffré ce que représente une intégration non pilotée sur vos lignes transport ? C'est exactement le sujet sur lequel Daylindo apporte une réponse concrète. 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <div></div>
+                <button class="nav-btn primary" onclick="markDone(1); goTo(2)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-2">
+            <div class="panel-header">
+                <div class="panel-counter">2 / 8</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Audrey Aucouturier</div>
+                    <div class="panel-meta">Chief People Officer — Grand Frais / Prosol</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.grandfrais.com" target="_blank">↗ Ouvrir : grandfrais.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section savoir-faire / qualité produits frais.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Audrey, sur le site de Grand Frais, le groupe positionne la qualité des produits frais et l'expérience client comme ses différenciateurs absolus. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.catalog-prospectus.fr/articles/grand-frais-en-mode-conquete-25-nouveaux-magasins-32-ex-gifi-et-3-500-emplois-en-2026" target="_blank">↗ Ouvrir : catalog-prospectus.fr — 32 ex-GiFi + 3 500 emplois</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet article. Montre le titre et les chiffres : 32 magasins, 3 500 emplois.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici que Grand Frais ouvre 32 magasins ex-GiFi et recrute 3 500 personnes en 2026 — une expansion massive et simultanée. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« 32 équipes différentes qui apprennent les gestes métier en même temps — comment vous assurez-vous que le standard Grand Frais est le même partout dès l'ouverture ? C'est exactement le sujet sur lequel Daylindo peut vous aider. Est-ce qu'on peut en discuter 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(1)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(2); goTo(3)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-3">
+            <div class="panel-header">
+                <div class="panel-counter">3 / 8</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Nadine M.</div>
+                    <div class="panel-meta">Responsable Formation — Grand Frais / Prosol</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.grandfrais.com" target="_blank">↗ Ouvrir : grandfrais.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section métiers frais — boucherie, poissonnerie, fromagerie.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Nadine, sur le site de Grand Frais, les savoir-faire métiers — boucherie, poissonnerie, fromagerie — sont présentés comme l'ADN de l'enseigne. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.catalog-prospectus.fr/articles/grand-frais-en-mode-conquete-25-nouveaux-magasins-32-ex-gifi-et-3-500-emplois-en-2026" target="_blank">↗ Ouvrir : catalog-prospectus.fr — 32 sites ex-GiFi à intégrer</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet article. Montre le passage sur la conversion des équipes GiFi.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici que 32 sites ex-GiFi vont basculer sous enseigne Grand Frais — avec des équipes qui viennent d'une culture complètement différente. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Quel dispositif vous permet de prouver que les gestes métier Grand Frais sont bien acquis sur chaque nouveau site, avec des équipes qui ne connaissent pas vos standards ? C'est exactement ce que Daylindo permet de structurer. Est-ce qu'on peut en parler 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(2)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(3); goTo(4)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-4">
+            <div class="panel-header">
+                <div class="panel-counter">4 / 8</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Lionel Bernard</div>
+                    <div class="panel-meta">DRH Groupe — Spie Batignolles</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.spiebatignolles.fr" target="_blank">↗ Ouvrir : spiebatignolles.fr</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section expertise technique / grands projets infrastructure.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Lionel, sur le site de Spie Batignolles, le groupe valorise la maîtrise technique sur les grands projets d'infrastructure comme son positionnement clé. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.spiebatignolles.fr/le-toarc-secteur-1-attribue-au-groupement-mene-par-spie-batignolles/" target="_blank">↗ Ouvrir : spiebatignolles.fr — 3e marché Canal Seine-Nord 662M€</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cette page. Montre le titre et le montant : 662 millions d'euros, 3e marché attribué.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici que Spie Batignolles vient de décrocher son 3e marché consécutif sur le Canal Seine-Nord — 662 millions d'euros, avec des recrutements massifs annoncés. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Sur un chantier comme Seine-Nord, les gestes critiques BTP doivent être transmis et tracés avant mise en poste. Comment vous assurez-vous que les compétences terrain sont au niveau sur chaque lot ? C'est le sujet sur lequel Daylindo peut vous apporter quelque chose de concret. Est-ce qu'on peut en discuter ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(3)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(4); goTo(5)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-5">
+            <div class="panel-header">
+                <div class="panel-counter">5 / 8</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Floriane Dupont-Rouger</div>
+                    <div class="panel-meta">DRH — Spie Batignolles Énergie</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.spiebatignolles.fr" target="_blank">↗ Ouvrir : spiebatignolles.fr</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section énergie / gestes électriques / HSE.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Floriane, sur le site de Spie Batignolles, la maîtrise des gestes électriques et la culture HSE sont présentées comme non-négociables sur chantier. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.spiebatignolles.fr/le-toarc-secteur-1-attribue-au-groupement-mene-par-spie-batignolles/" target="_blank">↗ Ouvrir : spiebatignolles.fr — montée en cadence Seine-Nord lots énergie</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cette page. Montre la section recrutements et montée en cadence.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici la montée en cadence de Spie Batignolles sur le Canal Seine-Nord — avec des lots énergie qui impliquent des recrutements massifs. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Sur des interventions électriques en chantier, une erreur c'est un accident grave. Avec les recrutements en cours, comment garantissez-vous que chaque technicien a bien acquis les gestes critiques avant intervention — et que c'est traçable et opposable en cas de contrôle ? C'est exactement ce que Daylindo permet. 15 minutes ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(4)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(5); goTo(6)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-6">
+            <div class="panel-header">
+                <div class="panel-counter">6 / 8</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Thibaut LILAS</div>
+                    <div class="panel-meta">DRH Manufactures Joaillières & Horlogères — Cartier / Richemont</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.journalduluxe.fr/fr/montres-joaillerie/interview-thibaut-lilas-cartier-manufactures-joaillieres-horlogeres" target="_blank">↗ Ouvrir : journalduluxe.fr — interview Thibaut Lilas</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cet article. Montre le titre de l'interview et le passage sur la philosophie de transmission.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Thibaut, j'ai lu votre interview dans le Journal du Luxe — vous y parlez de l'engagement de Cartier pour la transmission des savoir-faire artisanaux, et de votre conviction que les écoles seules ne suffisent pas. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.journalduluxe.fr/fr/montres-joaillerie/cartier-engage-transmission-metiers-art-horlogers" target="_blank">↗ Ouvrir : journalduluxe.fr — Cartier s'engage pour la transmission mars 2026</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet article. Montre le titre et la citation du PDG de Cartier.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici l'annonce du partenariat Cartier avec The King's Foundation — un engagement public fort sur la formation des artisans horlogers. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Une déclaration publique comme celle-là engage. Daylindo permet de la rendre opérationnelle — traçable et prouvable, geste par geste, dans vos manufactures. Est-ce qu'on peut en parler 15 minutes pour voir ce que ça donnerait concrètement chez vous ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(5)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(6); goTo(7)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-7">
+            <div class="panel-header">
+                <div class="panel-counter">7 / 8</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Marie-Caroline Abramatic</div>
+                    <div class="panel-meta">Directeur Manufacturing Joaillerie France — Cartier / Richemont</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.cartier.com/fr-fr/collections/high-Jewellery/savoir-faire" target="_blank">↗ Ouvrir : cartier.com — savoir-faire joailliers</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section transmission maître-apprenti / gestes joailliers.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Marie-Caroline, sur le site de Cartier, on voit que la transmission des gestes joailliers se fait de maître à apprenti — et que c'est présenté comme une mission critique de la Maison. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.journalduluxe.fr/fr/montres-joaillerie/cartier-engage-transmission-metiers-art-horlogers" target="_blank">↗ Ouvrir : journalduluxe.fr — engagement transmission mars 2026</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cet article. Montre la citation sur la transmission à la prochaine génération.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai lu ici l'engagement public de Cartier pour la formation et la transmission des savoir-faire joailliers à la prochaine génération. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« En tant que Directrice Manufacturing Joaillerie France, comment prouvez-vous qu'un artisan maîtrise le geste joaillier avant de le mettre en autonomie sur une pièce à haute valeur ? C'est exactement ce que Daylindo permet de structurer et de tracer. Je serais ravi d'en discuter 15 minutes. »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(6)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(7); goTo(8)">Suivant →</button>
+            </div>
+        </div>
+        <div class="panel" id="panel-8">
+            <div class="panel-header">
+                <div class="panel-counter">8 / 8</div>
+                <div class="panel-identity">
+                    <div class="panel-name">Magalie Hatchiguian</div>
+                    <div class="panel-meta">DRH Headquarter — Balenciaga / Kering</div>
+                </div>
+                <div class="panel-timer">⏱ 45–60 sec</div>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="step-block">
+                    <div class="step-tag tag-screen">🖥 ÉCRAN 1</div>
+                    <div class="step-title">Ouvre cet onglet avant d'appuyer sur Record</div>
+                    <a class="url-btn" href="https://www.balenciaga.com" target="_blank">↗ Ouvrir : balenciaga.com</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Ouvre cette page. Montre la section vision / excellence interne de la Maison.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Bonjour Magalie, sur le site de Balenciaga, la Maison affiche une vision forte sur l'excellence et le développement interne de ses équipes. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ bascule sur l'onglet 2</div>
+
+                <div class="step-block">
+                    <div class="step-tag tag-article">📰 ÉCRAN 2</div>
+                    <div class="step-title">Bascule sur cet onglet</div>
+                    <a class="url-btn" href="https://www.glassdoor.fr/job-listing/balenciaga-hq-talent-acquisition-and-training-manager-h-f-balenciaga-JV_IC2881970_KO0,57_KE58,68.htm?jl=1010098889218" target="_blank">↗ Ouvrir : Glassdoor — offre HQ Training Manager avr. 2026</a>
+                    <div class="instruction-box">
+                        <div class="instruction-label">📌 Ce que tu montres</div>
+                        <div class="instruction-text">Bascule sur cette offre. Montre le titre du poste et la mission principale.</div>
+                    </div>
+                    <div class="script-box">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Et j'ai vu ici que Balenciaga vient de créer un poste dédié HQ Talent Acquisition and Training Manager — un signal fort de structuration interne. »</div>
+                    </div>
+                </div>
+
+                <div class="arrow-separator">↓ regarde la caméra</div>
+
+                <div class="step-block step-cta">
+                    <div class="step-tag tag-cta">🎯 VALEUR + CTA</div>
+                    <div class="step-title">Regarde la caméra — reste sur l'écran 2</div>
+                    <div class="script-box cta-script">
+                        <div class="script-label">🎙 Ce que tu dis</div>
+                        <div class="script-text">« Un Training Manager qui arrive avec un dispositif opérationnel dès J1 va deux fois plus vite. Daylindo lui donne la structure pour piloter et tracer la transmission des pratiques dès le premier jour. Est-ce qu'on peut en parler 15 minutes pour voir si c'est pertinent pour vous ? »</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="panel-nav">
+                <button class="nav-btn" onclick="goTo(7)">← Précédent</button>
+                <button class="nav-btn primary" onclick="markDone(8)">Marquer terminé ✓</button>
+            </div>
+        </div>
+</div>
+
+<script>
+const total = 8;
+let done = new Set();
+
+function goTo(n) {
+    if (n < 1 || n > total) return;
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    document.getElementById('panel-' + n).classList.add('active');
+    document.getElementById('nav-' + n).classList.add('active');
+    document.getElementById('nav-' + n).scrollIntoView({block:'nearest'});
+    window.scrollTo(0,0);
+}
+
+function markDone(n) {
+    done.add(n);
+    document.getElementById('nav-' + n).classList.add('done');
+    updateProgress();
+}
+
+function updateProgress() {
+    const pct = Math.round((done.size / total) * 100);
+    document.getElementById('progress-text').textContent = done.size + ' / ' + total + ' terminés';
+    document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+goTo(1);
+</script>
+</body>
+</html>
